@@ -1,7 +1,7 @@
 import gspread as gsp
 from google.oauth2.service_account import Credentials
 from logic import Logic
-from time import sleep
+
 
 scopes = [
     'https://www.googleapis.com/auth/spreadsheets',
@@ -23,6 +23,20 @@ worksheet = sheet.get_worksheet(0)  # Get the first sheet of the spreadsheet
 column_situation = 7
 column_naf = 8  # naf column, naf is the grade that the student needs to get in the final exam
 
+range_of_update = 'G4:H27'
+range_of_grades = 'D4:F27'
+range_of_absent = 'C4:C27'
+range_cells_grade = worksheet.get(range_of_grades)
+range_cells_absent = worksheet.get(range_of_absent)
+result = []
+
+for x in range(24):
+    logic = Logic(range_cells_grade[x][0], range_cells_grade[x][1], range_cells_grade[x][2], range_cells_absent[x][0])
+    result.append(logic.approval())
+
+worksheet.update(result, range_of_update)
+
+""" too slow
 for x in range(4, 28):
     logic = Logic(worksheet.cell(x, 4).value,
                   worksheet.cell(x, 5).value,
@@ -36,3 +50,4 @@ for x in range(4, 28):
     worksheet.update_cell(x, column_naf, logic.approval()[1])  # update the naf column
 
     sleep(2)  # sleep for 2 seconds because the Google sheets api has a limit of requests per minutes
+"""
